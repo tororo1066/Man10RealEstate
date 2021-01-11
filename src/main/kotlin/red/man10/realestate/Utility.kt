@@ -51,14 +51,25 @@ object Utility {
         if (command != null) {
             clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/$command")
         }
+        if (lan(p)){
+            val message = ComponentBuilder("${Plugin.prefix}$text§a§l[Click here to autofill!]").event(clickEvent).create()
+            p.spigot().sendMessage(*message)
+        }else{
+            val message = ComponentBuilder("${Plugin.prefix}$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
+            p.spigot().sendMessage(*message)
+        }
 
-        val message = ComponentBuilder("${Plugin.prefix}$text§a§l[ここをクリックで自動入力！]").event(clickEvent).create()
-        p.spigot().sendMessage(*message)
     }
 
     //prefix付きのメッセージ
     fun sendMessage(player: Player, message: String) {
         player.sendMessage("${Plugin.prefix} $message")
+    }
+
+    //language
+    fun lan(p : Player): Boolean {
+        if (p.locale.contains("en"))return true
+        return false
     }
 
 }

@@ -8,6 +8,7 @@ import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.vault
+import red.man10.realestate.Utility.lan
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -291,16 +292,28 @@ object Region {
         val data = get(id)
 
         if (data == null){
+            if (lan(p)){
+                sendMessage(p,"§c§lA land that doesn't exist!")
+                return
+            }
             sendMessage(p,"§c§l存在しない土地です！")
             return
         }
 
         if (p.uniqueId == data.ownerUUID){
+            if (lan(p)){
+                sendMessage(p,"§c§lYou are the owner of this land!")
+                return
+            }
             sendMessage(p,"§c§lあなたはこの土地のオーナーです！")
             return
         }
 
         if (vault.getBalance(p.uniqueId) < data.price){
+            if (lan(p)){
+                sendMessage(p,"§c§lI don't have enough money in my possession!")
+                return
+            }
             sendMessage(p,"§c§l所持金が足りません！")
             return
         }
@@ -315,7 +328,12 @@ object Region {
         setOwner(id,p)
         setStatus(id,"Protected")
 
-        sendMessage(p,"§a§l土地の購入成功！土地の保護がされました！")
+        if (lan(p)){
+            sendMessage(p,"§a§lLand purchase a success! The land has been protected!")
+        }else{
+            sendMessage(p,"§a§l土地の購入成功！土地の保護がされました！")
+        }
+
 
     }
 

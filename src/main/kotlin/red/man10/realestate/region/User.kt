@@ -6,6 +6,7 @@ import red.man10.realestate.MySQLManager
 import red.man10.realestate.Plugin.Companion.mysqlQueue
 import red.man10.realestate.Plugin.Companion.offlineBank
 import red.man10.realestate.Plugin.Companion.plugin
+import red.man10.realestate.Utility.lan
 import red.man10.realestate.Utility.sendMessage
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -264,21 +265,35 @@ object User{
         val rg = Region.get(id)?:return
 
         if (rg.ownerUUID == p.uniqueId){
+            if (lan(p)){
+                sendMessage(p,"§3§lI can't like you because you're the owner!")
+                return
+            }
             sendMessage(p,"§3§lあなたはオーナーなのでいいね出来ません！")
             return
+
         }
 
         if (isLike(p,id)){
             likeData[p]!!.remove(id)
 
             mysqlQueue.add("DELETE FROM `liked_index` WHERE `uuid`='${p.uniqueId}' AND `region_id`=$id;")
+            if (lan(p)){
+                sendMessage(p,"§a§aGood has been removed!")
+                return
+            }
             sendMessage(p,"§a§aいいね解除しました！")
             return
         }
 
         likeData[p]!!.add(id)
         mysqlQueue.add("INSERT INTO `liked_index` (`region_id`, `player`, `uuid`, `score`) VALUES ('$id', '${p.name}', '${p.uniqueId}', '0');")
-        sendMessage(p,"§a§lいいねしました！")
+        if (lan(p)){
+            sendMessage(p,"§a§lLiked!")
+        }else{
+            sendMessage(p,"§a§lいいねしました！")
+        }
+
     }
 
 

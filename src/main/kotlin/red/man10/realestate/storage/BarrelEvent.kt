@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import red.man10.realestate.Utility.lan
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.storage.Barrel.addPermission
 import red.man10.realestate.storage.Barrel.hasItem
@@ -75,6 +76,10 @@ object BarrelEvent:Listener {
         e.isCancelled = true
 
         if (!hasPermission(p,barrelState)){
+            if (lan(p)){
+                sendMessage(p,"§c§lYou are not permissions to open this barrel!")
+                return
+            }
             sendMessage(p,"§c§lあなたはこの樽を開く権限がありません！")
             return
         }
@@ -82,6 +87,10 @@ object BarrelEvent:Listener {
         val loc = block.location
 
         if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
+            if (lan(p)){
+                sendMessage(p,"§c§lIt's currently open to other players!")
+                return
+            }
             sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
             return
         }
@@ -126,19 +135,32 @@ object BarrelEvent:Listener {
         val p = e.player
 
         if (!hasPermission(p,state)){
-            sendMessage(p,"§c§lあなたはこの樽を壊す権限がありません")
+            if (lan(p)){
+                sendMessage(p,"§c§lYou have no permission to break this barrel.")
+            }else {
+                sendMessage(p, "§c§lあなたはこの樽を壊す権限がありません")
+            }
             e.isCancelled = true
             return
         }
 
         if (isOpen.contains(Triple(loc.blockX,loc.blockY,loc.blockZ))){
-            sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
+            if (lan(p)){
+                sendMessage(p,"§c§lIt's currently open to other players!")
+            }else{
+                sendMessage(p,"§c§l現在他のプレイヤーが開いています！")
+            }
             e.isCancelled = true
             return
         }
 
         if(hasItem(state)){
-            sendMessage(p,"§c§l中にアイテムが入っています！")
+            if (lan(p)){
+                sendMessage(p,"§c§lThere's an item inside!")
+            }else{
+                sendMessage(p,"§c§l中にアイテムが入っています！")
+            }
+
             e.isCancelled = true
             return
         }

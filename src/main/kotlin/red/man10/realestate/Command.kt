@@ -17,6 +17,7 @@ import red.man10.realestate.Plugin.Companion.maxBalance
 import red.man10.realestate.Plugin.Companion.plugin
 import red.man10.realestate.Plugin.Companion.teleportPrice
 import red.man10.realestate.Plugin.Companion.vault
+import red.man10.realestate.Utility.lan
 import red.man10.realestate.Utility.sendHoverText
 import red.man10.realestate.Utility.sendMessage
 import red.man10.realestate.menu.InventoryMenu
@@ -62,6 +63,10 @@ object Command:CommandExecutor {
                     val data = Region.get(id)?:return false
 
                     if (data.status != "OnSale"){
+                        if (lan(sender)){
+                            sendMessage(sender,"§4§lThis lot is not for sale!")
+                            return false
+                        }
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
                         return false
                     }
@@ -82,10 +87,21 @@ object Command:CommandExecutor {
                     val data = Region.get(id)?:return false
 
                     if (data.status != "OnSale"){
+                        if (lan(sender)){
+                            sendMessage(sender,"§4§lThis lot is not for sale!")
+                            return false
+                        }
                         sendMessage(sender,"§4§lこの土地は販売されていません！")
                         return false
                     }
+                    if (lan(sender)){
+                        sendMessage(sender,"§c§lFees：${data.price} ID：${id}" +
+                                " §a§lCurrent owner：${Region.getOwner(data)}")
+                        sendMessage(sender,"§e§lAre you sure you want to buy? (If you don't want to buy, please ignore this message)")
+                        sendHoverText(sender,"§a§l[Buy now]","§6§l${data.price}","mre buy $id")
 
+                        return true
+                    }
                     sendMessage(sender,"§c§l料金：${data.price} ID：${id}" +
                             " §a§l現在のオーナー：${Region.getOwner(data)}")
                     sendMessage(sender,"§e§l本当に購入しますか？(購入しない場合は無視してください)")
@@ -110,6 +126,11 @@ object Command:CommandExecutor {
                     if (!hasPerm(sender,USER))return false
 
                     if (args.size != 3){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lThere's a problem with the input!")
+                            sendMessage(sender,"§c§l/mre adduser <ID> <User Name>")
+                            return false
+                        }
                         sendMessage(sender,"§c§l入力方法に問題があります！")
                         sendMessage(sender,"§c§l/mre adduser <ID> <ユーザー名>")
                         return false
@@ -121,6 +142,10 @@ object Command:CommandExecutor {
                     val data = Region.get(id)
 
                     if (data == null){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lA land that doesn't exist!")
+                            return false
+                        }
                         sendMessage(sender,"§c§l存在しない土地です！")
                         return false
                     }
@@ -128,6 +153,10 @@ object Command:CommandExecutor {
                     val maxUser = City.getMaxUser(City.where(data.teleport))
 
                     if (Region.getUsers(id)> maxUser){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lWe have reached the maximum number of residents who can move in!(Max${maxUser}people)")
+                            return false
+                        }
                         sendMessage(sender,"§c§l入居できる住人の上限に達しています！(最大${maxUser}人)")
                         return false
                     }
@@ -135,11 +164,19 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null ){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lThe user may be offline!")
+                            return false
+                        }
                         sendMessage(sender,"§c§lユーザーがオフラインの可能性があります！")
                         return false
                     }
 
                     if (User.get(p,id) != null){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lThis user is already a resident!")
+                            return false
+                        }
                         sendMessage(sender,"§c§lこのユーザーは既に住人です！")
                         return false
                     }
@@ -148,19 +185,38 @@ object Command:CommandExecutor {
 
                     numbers.add(number)
 
+                    if (lan(p)){
+                        sendMessage(p,"§a§l=================Land information==================")
+                        sendMessage(p,"§a§lOwner：${sender.name}")
+                        sendMessage(p,"§a§lLand ID：$id")
+                        sendMessage(p,"§a§lLand status：${data.status}")
+                        sendMessage(p,"§a§l===========================================")
 
-                    sendMessage(p,"§a§l=================土地の情報==================")
-                    sendMessage(p,"§a§lオーナー：${sender.name}")
-                    sendMessage(p,"§a§l土地のID：$id")
-                    sendMessage(p,"§a§l土地のステータス：${data.status}")
-                    sendMessage(p,"§a§l===========================================")
+                        sendMessage(p,"§e§lClick on the chat text below if you accept, or ignore this text if you don't")
 
-                    sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
+                        sendHoverText(p,"§e§l[I accept to move in]","§a§lAccept","mre acceptuser $id ${sender.name} $number")
 
-                    sendHoverText(p,"§e§l[入居に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
+                    }else{
+                        sendMessage(p,"§a§l=================土地の情報==================")
+                        sendMessage(p,"§a§lオーナー：${sender.name}")
+                        sendMessage(p,"§a§l土地のID：$id")
+                        sendMessage(p,"§a§l土地のステータス：${data.status}")
+                        sendMessage(p,"§a§l===========================================")
 
-                    sendMessage(sender,"§a§l現在承諾待ちです....")
-                    return true
+                        sendMessage(p,"§e§l承諾する場合は下のチャット文をクリック、しない場合はこの文を無視してください")
+
+                        sendHoverText(p,"§e§l[入居に承諾する]","§a§l承諾する","mre acceptuser $id ${sender.name} $number")
+                    }
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lWe are currently waiting for your approval....")
+                        return true
+                    }else{
+                        sendMessage(sender,"§a§l現在承諾待ちです....")
+                        return true
+                    }
+
+
+
 
                 }
 
@@ -178,11 +234,20 @@ object Command:CommandExecutor {
 
                     User.create(sender,args[1].toInt())
 
-                    sendMessage(sender,"§a§l登録完了！あなたは住人になりました！")
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lRegistration complete! You are now a resident!")
+                    }else{
+                        sendMessage(sender,"§a§l登録完了！あなたは住人になりました！")
+                    }
 
-                    sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の入居に成功しました！")
+                    return if (lan(Bukkit.getPlayer(args[2])!!)){
+                        sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name} has successfully moved in a resident!")
+                        true
+                    }else{
+                        sendMessage(Bukkit.getPlayer(args[2])!!,"§a§l${sender.name}が住人の入居に成功しました！")
+                        true
+                    }
 
-                    return true
 
                 }
 
@@ -199,12 +264,20 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lWe can't move out because the inhabitants are offline!")
+                            return false
+                        }
                         sendMessage(sender,"§c§l住人がオフラインなので退去できません！")
                         return false
                     }
 
                     User.remove(p,id)
 
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lRetreat is over!")
+                        return true
+                    }
                     sendMessage(sender,"§a§l退去完了！")
                     return true
 
@@ -237,14 +310,21 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
+                        if (lan(sender)){
+                            sendMessage(sender,"§3§lPlease enter an online user")
+                            return true
+                        }
                         sendMessage(sender,"§3§lオンラインのユーザーを入力してください")
                         return true
                     }
 
                     Region.setOwner(id,p)
 
+                    if (lan(sender)){
+                        sendMessage(sender,"§e§lThe owner of the ${args[1]} has been changed to ${args[2]}.")
+                        return true
+                    }
                     sendMessage(sender,"§e§l${args[1]}のオーナーを${args[2]}に変更しました")
-
                     return true
 
                 }
@@ -259,6 +339,10 @@ object Command:CommandExecutor {
                     val loc = sender.location
 
                     if (!vault.withdraw(sender.uniqueId,Plugin.setTPPrice)){
+                        if (lan(sender)){
+                            sendMessage(sender,"§cA fee is required")
+                            return true
+                        }
                         sendMessage(sender,"§c手数料が必要です")
                         return true
                     }
@@ -266,12 +350,19 @@ object Command:CommandExecutor {
                     val data = Region.get(id)?:return false
 
                     if (!Utility.isWithinRange(loc,data.startPosition,data.endPosition,data.world,data.server)){
+                        if (lan(sender)){
+                            sendMessage(sender,"§cIt is not possible to set teleportation points outside the land")
+                            return true
+                        }
                         sendMessage(sender,"§c土地の外にテレポートポイントを設定することはできません")
                         return true
                     }
 
                     Region.setRegionTeleport(args[1].toInt(), loc)
-
+                    if (lan(sender)){
+                        sendMessage(sender,"§e§lRegistration complete!")
+                        return true
+                    }
                     sendMessage(sender,"§e§l登録完了！")
                     return true
                 }
@@ -297,15 +388,25 @@ object Command:CommandExecutor {
                     val p = Bukkit.getPlayer(args[2])
 
                     if (p == null){
+                        if (lan(sender)){
+                            sendMessage(sender,"§c§lThe rent can only be changed when the resident is online")
+                            return false
+                        }
                         sendMessage(sender,"§c§l住人がオンラインのときのみ、賃料を変更できます")
                         return false
                     }
 
                     User.setRentPrice(p,id,rent)
-
-                    sendMessage(sender,"§a§l設定完了！")
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lSet to finish!")
+                    }else{
+                        sendMessage(sender,"§a§l設定完了！")
+                    }
+                    if (lan(p)){
+                        sendMessage(p,"§a§lThe rent for ID:$id has been changed! Rent:$rent")
+                        return true
+                    }
                     sendMessage(p,"§a§lID:$id　の賃料が変更されました！！ 賃料:$rent")
-
                     return true
 
                 }
@@ -323,8 +424,11 @@ object Command:CommandExecutor {
 
                     Region.setStatus(id,args[2])
 
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lStatus of ${args[1]} changed to ${args[2]}.")
+                        return true
+                    }
                     sendMessage(sender,"§a§l${args[1]}のステータスを${args[2]}に変更しました")
-
                     return true
 
                 }
@@ -346,7 +450,11 @@ object Command:CommandExecutor {
 
                     Region.setPrice(id,price)
 
-                    sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
+                    if (lan(sender)){
+                        sendMessage(sender,"§a§lThe $id amount was changed to ${args[2]}.")
+                    }else{
+                        sendMessage(sender,"§a§l${id}の金額を${args[2]}に変更しました")
+                    }
 
                 }
 
@@ -358,6 +466,10 @@ object Command:CommandExecutor {
                     if (!NumberUtils.isNumber(args[1]))return false
 
                     if (vault.getBalance(sender.uniqueId)< teleportPrice){
+                        if (lan(sender)){
+                            sender.sendMessage("§a§lYou do not have enough money to teleport! Please prepare ${teleportPrice}!")
+                            return true
+                        }
                         sender.sendMessage("§a§lテレポートするための所持金が足りません！${teleportPrice}円用意してください！")
                         return true
                     }
@@ -375,8 +487,11 @@ object Command:CommandExecutor {
                 }
 
                 else ->{
+                    if (lan(sender)){
+                        sendMessage(sender,"§c§l不明なコマンドです！")
+                        return false
+                    }
                     sendMessage(sender,"§c§l不明なコマンドです！")
-
                     return false
 
                 }

@@ -8,6 +8,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import red.man10.realestate.Utility
+import red.man10.realestate.Utility.lan
 import red.man10.realestate.menu.CustomInventory.InventoryID.*
 import red.man10.realestate.menu.InventoryMenu.cache
 import red.man10.realestate.region.User
@@ -100,6 +101,10 @@ object InventoryListener : Listener{
                     13 -> InventoryMenu.userList(p,id,0)
                     15 -> {
                         CustomInventory.close(p)
+                        if (lan(p)){
+                            Utility.sendSuggest(p,"§a§Add a resident","mre adduser $id ")
+                            return
+                        }
                         Utility.sendSuggest(p,"§a§住人を追加する","mre adduser $id ")
                         return
                     }
@@ -117,7 +122,12 @@ object InventoryListener : Listener{
                     10->InventoryMenu.statusMenu(p,id)
                     13->{
                         CustomInventory.close(p)
-                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
+                        if (lan(p)){
+                            Utility.sendSuggest(p,"§a§lSetting the price of the land","mre setprice $id ")
+                        }else{
+                            Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setprice $id ")
+                        }
+
                     }
                     16->{
                         p.performCommand("mre settp $id")
@@ -126,7 +136,12 @@ object InventoryListener : Listener{
                     38->InventoryMenu.spanMenu(p,id)
                     42->{
                         CustomInventory.close(p)
-                        Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ")
+                        if (lan(p)){
+                            Utility.sendSuggest(p,"§a§lSetting the price of the land","mre setowner $id ")
+                        }else{
+                            Utility.sendSuggest(p,"§a§l土地の値段を設定する","mre setowner $id ")
+                        }
+
                     }
                 }
 
@@ -224,8 +239,14 @@ object InventoryListener : Listener{
                     11->InventoryMenu.setPermission(p,id,uuid)
                     13->{
                         CustomInventory.close(p)
-                        Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
-                                " ${Bukkit.getOfflinePlayer(uuid).name} ")
+                        if (lan(p)){
+                            Utility.sendSuggest(p,"§a§lSet your rent","mre setrent $id" +
+                                    " ${Bukkit.getOfflinePlayer(uuid).name} ")
+                        }else{
+                            Utility.sendSuggest(p,"§a§l賃料を設定する","mre setrent $id" +
+                                    " ${Bukkit.getOfflinePlayer(uuid).name} ")
+                        }
+
                     }
                     15->{
                         val user1 = Bukkit.getOfflinePlayer(uuid)
@@ -233,6 +254,10 @@ object InventoryListener : Listener{
                             p.performCommand("mre removeuser $id ${user1.name}")
                         }else{
                             User.remove(user1.uniqueId,id)
+                            if (lan(p)){
+                                Utility.sendMessage(p,"§a§lResident removed!")
+                                return
+                            }
                             Utility.sendMessage(p,"§a§l住人を削除しました!")
                             return
                         }
